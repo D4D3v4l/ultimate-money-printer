@@ -631,24 +631,38 @@ export const learningPath = {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Mapa de misiones secuenciales (home)                                        */
+/* Rutas por tema (home)                                                       */
 /* -------------------------------------------------------------------------- */
 
-/** Icono asociado a un nivel. La equivalencia con lucide vive en la vista. */
-export type MissionIcon = "fraction" | "reading" | "problems"
+/** Icono asociado a una ruta. La equivalencia con lucide vive en la vista. */
+export type RouteIcon = "fraction" | "reading" | "problems"
 
-export type MissionNode = {
-  id: number
-  state: "active" | "locked"
-  /** Etiqueta corta que cabe dentro del nodo circular. */
-  label: string
-  /** Nombre completo del nivel, mostrado bajo el nodo. */
+/**
+ * Estado de una historia. El estado de la ruta se deriva de sus historias, no
+ * se almacena: así es imposible que ambos se desincronicen.
+ */
+export type StoryStatus = "done" | "current" | "locked"
+
+export type Story = {
+  id: string
   title: string
-  icon: MissionIcon
-  /** Destino del nivel activo. */
-  to?: string
-  action?: string
-  lockedNote?: string
+  description: string
+  status: StoryStatus
+  /** Duración estimada de la historia. */
+  duration: string
+  /** Puntos que se ganan al completarla. */
+  points: number
+}
+
+/** Una ruta por tema: el acordeón que agrupa las historias de una materia. */
+export type ThemeRoute = {
+  id: string
+  theme: string
+  subject: string
+  icon: RouteIcon
+  tutor: string
+  summary: string
+  stories: Story[]
 }
 
 export const topicSearch = {
@@ -660,38 +674,133 @@ export const topicSearch = {
   created: "Misión personalizada en preparación",
 }
 
-export const missionMap = {
-  eyebrow: "Ruta de misiones",
+export const routesSection = {
+  eyebrow: "Rutas por tema",
   title: "Tu Ruta de Misiones",
   description:
-    "Avanza nivel por nivel. Cada misión se desbloquea al completar la anterior y respeta tu ritmo de 15 minutos diarios.",
-  progressNote: "1 de 3 niveles desbloqueados",
+    "Hay una ruta por tema. Abre la que estés trabajando para ver las historias que necesitas hacer y continúa justo donde la dejaste.",
+  storiesUnit: "historias",
   viewAllAction: "Ver ruta completa",
-  nodes: [
-    {
-      id: 1,
-      state: "active",
-      label: "Nivel 1",
-      title: "Fracciones con sentido visual",
-      icon: "fraction",
-      to: "/learning-path",
-      action: "Continuar misión",
-    },
-    {
-      id: 2,
-      state: "locked",
-      label: "Nivel 2",
-      title: "Pistas ocultas en la lectura",
-      icon: "reading",
-      lockedNote: "Desbloquea al completar el Nivel 1",
-    },
-    {
-      id: 3,
-      state: "locked",
-      label: "Nivel 3",
-      title: "Resolución de problemas integrados",
-      icon: "problems",
-      lockedNote: "Desbloquea al completar el Nivel 2",
-    },
-  ] satisfies MissionNode[],
+  statusLabels: {
+    active: "En curso",
+    completed: "Completada",
+    locked: "Bloqueada",
+  },
 }
+
+export const themeRoutes: ThemeRoute[] = [
+  {
+    id: "fracciones",
+    theme: "Fracciones con sentido visual",
+    subject: "Matemáticas",
+    icon: "fraction",
+    tutor: "Búho Aurelio",
+    summary:
+      "Divide un todo en partes iguales y aprende a leer el numerador como la parte que tomas, no la que queda.",
+    stories: [
+      {
+        id: "fracciones-1",
+        title: "El pastel de la abuela",
+        description:
+          "Ana se comió 3 de 6 porciones iguales. Representa qué fracción del pastel se llevó.",
+        status: "done",
+        duration: "5 min",
+        points: 20,
+      },
+      {
+        id: "fracciones-2",
+        title: "El botín del capitán",
+        description:
+          "Reparte 12 monedas de oro entre 3 amigos sin que sobre ni falte ninguna.",
+        status: "current",
+        duration: "7 min",
+        points: 20,
+      },
+      {
+        id: "fracciones-3",
+        title: "La cinta de Leo",
+        description:
+          "Leo pintó 3 de 4 partes de una cinta. Compara su resultado con la mitad.",
+        status: "locked",
+        duration: "6 min",
+        points: 15,
+      },
+    ],
+  },
+  {
+    id: "inferencia",
+    theme: "Pistas ocultas en la lectura",
+    subject: "Lengua",
+    icon: "reading",
+    tutor: "Pandi",
+    summary:
+      "Lee entre líneas: descubre intenciones, causas y motivos que el texto no dice de forma explícita.",
+    stories: [
+      {
+        id: "inferencia-1",
+        title: "Jugaron bajo la lluvia",
+        description:
+          "El grupo decidió jugar con la lluvia encima. ¿Qué nos dice esa decisión?",
+        status: "locked",
+        duration: "8 min",
+        points: 20,
+      },
+      {
+        id: "inferencia-2",
+        title: "El cajón de Don Tomás",
+        description:
+          "La nieta cambió dónde se guardaban las herramientas. Explica por qué funcionó.",
+        status: "locked",
+        duration: "8 min",
+        points: 20,
+      },
+      {
+        id: "inferencia-3",
+        title: "Dos reseñas del mismo libro",
+        description:
+          "Dos personas recomendaron el mismo título y escribieron cosas distintas. ¿Por qué?",
+        status: "locked",
+        duration: "6 min",
+        points: 15,
+      },
+    ],
+  },
+  {
+    id: "problemas",
+    theme: "Resolución de problemas integrados",
+    subject: "Matemáticas y Lengua",
+    icon: "problems",
+    tutor: "Búho Aurelio y Pandi",
+    summary:
+      "Lee un problema de la vida diaria, identifica los datos que importan y elige la operación correcta.",
+    stories: [
+      {
+        id: "problemas-1",
+        title: "La excursión de la clase",
+        description:
+          "Calcula el costo de los cuadernos y los lápices, y cuánto paga cada alumno.",
+        status: "locked",
+        duration: "10 min",
+        points: 25,
+      },
+      {
+        id: "problemas-2",
+        title: "El pedido del kiosco",
+        description:
+          "Reparte la cuenta del kiosco entre cuatro amigos y comprueba que el total cuadra.",
+        status: "locked",
+        duration: "10 min",
+        points: 25,
+      },
+      {
+        id: "problemas-3",
+        title: "El presupuesto del viaje",
+        description:
+          "Elige una excursión que quepa en el presupuesto sin pasarte de los tres números.",
+        status: "locked",
+        duration: "12 min",
+        points: 30,
+      },
+    ],
+  },
+]

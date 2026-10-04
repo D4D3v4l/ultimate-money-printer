@@ -1,4 +1,10 @@
 import { ProgressBar } from "@/components/progress-bar";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,13 +18,15 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   learningPath,
-  missionMap,
   portal,
+  routesSection,
   student,
+  themeRoutes,
   topicSearch,
   tutors,
-  type MissionIcon,
-  type MissionNode,
+  type RouteIcon,
+  type Story,
+  type ThemeRoute,
 } from "@/lib/mock-data";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import {
@@ -26,30 +34,68 @@ import {
   BlocksIcon,
   BookOpenCheckIcon,
   CalendarDaysIcon,
+  CheckIcon,
   ClockIcon,
   CompassIcon,
   LockIcon,
   PieChartIcon,
+  PlayIcon,
   RocketIcon,
   SparklesIcon,
+  StarIcon,
   type LucideIcon,
 } from "lucide-react";
-import { Fragment, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_layout/")({
   component: MissionMap,
 });
 
-/** Equivalencia entre el dato plano y el icono de lucide de cada nivel. */
-const missionIcons: Record<MissionIcon, LucideIcon> = {
+/** Equivalencia entre el dato plano y el icono de lucide de cada ruta. */
+const routeIcons: Record<RouteIcon, LucideIcon> = {
   fraction: PieChartIcon,
   reading: BookOpenCheckIcon,
   problems: BlocksIcon,
 };
 
+/** Variante de `Badge` según el estado derivado de la ruta. */
+const routeStatusVariants = {
+  active: "default",
+  completed: "secondary",
+  locked: "outline",
+} as const;
+
+type RouteStatus = keyof typeof routeStatusVariants;
+
+/**
+ * Estado de la ruta derivado de sus historias: completada si todas están
+ * hechas, en curso si hay algo empezado y bloqueada si ninguna se ha abierto.
+ * No se guarda en los datos para que ambos nunca se desincronicen.
+ */
+function getRouteStatus(route: ThemeRoute): RouteStatus {
+  const done = route.stories.filter((story) => story.status === "done").length;
+
+  if (done === route.stories.length) {
+    return "completed";
+  }
+
+  const started =
+    done > 0 || route.stories.some((story) => story.status === "current");
+
+  return started ? "active" : "locked";
+}
+
 function MissionMap() {
   const [topic, setTopic] = useState("");
+
+  const allStories = themeRoutes.flatMap((route) => route.stories);
+  const doneStories = allStories.filter((story) => story.status === "done").length;
+  const overallProgress = Math.round((doneStories / allStories.length) * 100);
+  /** Las rutas en curso se abren por defecto para no esconder el siguiente paso. */
+  const openRouteIds = themeRoutes
+    .filter((route) => getRouteStatus(route) === "active")
+    .map((route) => route.id);
 
   /** Valida el tema y confirma la misión; la historia se generará en el juego. */
   function handleTopicSubmit(value: string) {
@@ -84,8 +130,8 @@ function MissionMap() {
             ¡Hola, {student.name}!
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-            Elige una misión de tu ruta o crea una aventura con cualquier tema
-            que se te ocurra.
+            Hay una ruta por tema. Abre la que estés trabajando y continúa justo
+            donde la dejaste.
           </p>
         </div>
         <div className="flex w-fit items-center gap-2 self-start rounded-xl bg-card px-4 py-2 ring-1 ring-foreground/10 md:self-auto">
@@ -117,16 +163,16 @@ function MissionMap() {
       {/* Test de diagnóstico inicial */}
       <DiagnosticCallout />
 
-      {/* Mapa de rutas secuenciales */}
+      {/* Rutas por tema: un acordeón por ruta, con sus historias dentro */}
       <Card className="gap-0 p-0">
         <CardHeader className="border-b">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <span className="text-xs font-semibold tracking-wider text-primary uppercase">
-                {missionMap.eyebrow}
+                {routesSection.eyebrow}
               </span>
               <CardTitle className="mt-1 text-xl md:text-2xl">
-                {missionMap.title}
+                {routesSection.title}
               </CardTitle>
             </div>
             <Button
@@ -134,40 +180,40 @@ function MissionMap() {
               render={<Link to="/learning-path" />}
               className="shrink-0"
             >
-              {missionMap.viewAllAction}
+              {routesSection.viewAllAction}
               <ArrowRightIcon />
             </Button>
           </div>
           <CardDescription className="max-w-3xl text-sm">
-            {missionMap.description}
+            {routesSection.description}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          <ol className="flex flex-col items-stretch gap-4 rounded-xl bg-muted/60 p-4 md:p-6 sm:flex-row sm:items-center sm:gap-0">
-            {missionMap.nodes.map((node, index) => (
-              <Fragment key={node.id}>
-                {index > 0 ? <PathConnector /> : null}
-                <MissionStep node={node} />
-              </Fragment>
+          <Accordion multiple defaultValue={openRouteIds} className="gap-2">
+            {themeRoutes.map((route) => (
+              <RouteItem key={route.id} route={route} />
             ))}
-          </ol>
+          </Accordion>
 
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{missionMap.progressNote}</span>
+              <span>
+                {doneStories} de {allStories.length}{" "}
+                {routesSection.storiesUnit}
+              </span>
               <span className="font-medium text-foreground">
-                {learningPath.progress.value}% completado
+                {overallProgress}% completado
               </span>
             </div>
             <ProgressBar
-              value={learningPath.progress.value}
+              value={overallProgress}
               size="lg"
               label={learningPath.progress.label}
             />
           </div>
 
-          {/* Tutores que acompañan la ruta */}
+          {/* Tutores que acompañan las rutas */}
           <div className="flex flex-col gap-2 rounded-xl bg-muted/60 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <AvatarGroup>
@@ -185,7 +231,7 @@ function MissionMap() {
                 </span>
                 <span className="block text-xs text-muted-foreground">
                   {tutors.map((tutor) => tutor.name).join(" y ")} te acompañan
-                  nivel por nivel.
+                  tema por tema.
                 </span>
               </div>
             </div>
@@ -201,8 +247,8 @@ function MissionMap() {
 }
 
 /**
- * Alta de misión por tema libre. Hoy sólo confirma el envío: la generación de
- * la historia-connectada vivirá en la pantalla de juego.
+ * Alta de misión por tema libre. Por ahora sólo confirma el envío: la
+ * generación de la historia vivirá en la pantalla de juego.
  */
 function TopicSearchForm({
   topic,
@@ -302,58 +348,109 @@ function DiagnosticCallout() {
   );
 }
 
-/** Línea punteada que une dos niveles consecutivos del mapa. */
-function PathConnector() {
+/** Encabezado del acordeón: tema, materia, tutor y avance de la ruta. */
+function RouteItem({ route }: { route: ThemeRoute }) {
+  const Icon = routeIcons[route.icon];
+  const status = getRouteStatus(route);
+  const done = route.stories.filter((story) => story.status === "done").length;
+
   return (
-    <li
-      aria-hidden="true"
-      className="hidden h-0 flex-1 list-none border-t-2 border-dashed border-border sm:block"
-    />
+    <AccordionItem value={route.id} className="rounded-lg border">
+      <AccordionTrigger className="items-center gap-3 px-2.5 py-3 hover:no-underline">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-primary">
+          <Icon className="size-4" />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate">{route.theme}</span>
+          <span className="truncate text-xs font-normal text-muted-foreground">
+            {route.subject} • {route.tutor} • {done}/{route.stories.length}{" "}
+            {routesSection.storiesUnit}
+          </span>
+        </span>
+        <Badge variant={routeStatusVariants[status]}>
+          {routesSection.statusLabels[status]}
+        </Badge>
+      </AccordionTrigger>
+
+      <AccordionContent className="px-2.5">
+        <p className="mb-4 text-muted-foreground">{route.summary}</p>
+        <ul className="flex flex-col gap-2">
+          {route.stories.map((story) => (
+            <StoryRow key={story.id} story={story} />
+          ))}
+        </ul>
+      </AccordionContent>
+    </AccordionItem>
   );
 }
 
-/** Nodo del mapa: circular si está activo, atenuado si sigue bloqueado. */
-function MissionStep({ node }: { node: MissionNode }) {
-  const Icon = missionIcons[node.icon];
-  const isActive = node.state === "active";
-
-  const contents = (
-    <>
-      <Icon className="size-5" />
-      <span className="text-xs font-semibold tracking-wide uppercase">
-        {node.label}
-      </span>
-    </>
-  );
+/** Una historia: qué hay que hacer, cuánto pesa y si ya está resuelta. */
+function StoryRow({ story }: { story: Story }) {
+  const statusIcon =
+    story.status === "done" ? (
+      <CheckIcon className="size-4" />
+    ) : story.status === "current" ? (
+      <PlayIcon className="size-4" />
+    ) : (
+      <LockIcon className="size-4" />
+    );
 
   return (
-    <li className="flex flex-1 flex-col items-center gap-3 text-center">
-      {isActive && node.to ? (
-        <Button
-          render={<Link to={node.to} />}
-          aria-label={`${node.label}: ${node.title}`}
-          className="size-20 rounded-full p-0 transition-transform hover:scale-105"
-        >
-          {contents}
-        </Button>
-      ) : (
-        <span
-          aria-disabled="true"
-          className="flex size-20 cursor-not-allowed flex-col items-center justify-center gap-1 rounded-full bg-card text-muted-foreground ring-1 ring-foreground/10"
-        >
-          {contents}
+    <li className="flex flex-col items-start gap-3 rounded-lg bg-muted/50 p-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-foreground/10">
+          {statusIcon}
         </span>
-      )}
-
-      <div className="flex flex-col gap-1">
-        <span className="flex items-center justify-center gap-1.5 text-sm font-medium">
-          {isActive ? null : <LockIcon className="size-3.5 shrink-0" />}
-          {node.title}
-        </span>
-        <span className="text-xs text-muted-foreground">
-          {isActive ? node.action : node.lockedNote}
-        </span>
+        <div className="flex min-w-0 flex-col gap-1">
+          <span className="text-sm font-medium">{story.title}</span>
+          <span className="text-xs text-muted-foreground">
+            {story.description}
+          </span>
+          <span className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <ClockIcon className="size-3" />
+              {story.duration}
+            </span>
+            <span aria-hidden="true">•</span>
+            <span className="flex items-center gap-1">
+              <StarIcon className="size-3" />+{story.points} pts
+            </span>
+          </span>
+        </div>
       </div>
+
+      <StoryAction status={story.status} />
     </li>
+  );
+}
+
+/** Acción de la historia según su estado. */
+function StoryAction({ status }: { status: Story["status"] }) {
+  if (status === "done") {
+    return (
+      <Badge variant="secondary" className="shrink-0 self-start sm:self-auto">
+        {routesSection.statusLabels.completed}
+      </Badge>
+    );
+  }
+
+  if (status === "locked") {
+    return (
+      <Button size="sm" disabled className="shrink-0 self-start sm:self-auto">
+        <LockIcon data-icon="inline-start" />
+        {routesSection.statusLabels.locked}
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      size="sm"
+      render={<Link to="/diagnostic" />}
+      className="shrink-0 self-start sm:self-auto"
+    >
+      <PlayIcon data-icon="inline-start" />
+      Jugar
+    </Button>
   );
 }
