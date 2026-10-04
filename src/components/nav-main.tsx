@@ -21,13 +21,13 @@ export function NavMain({ items }: { items: NavMainItem[] }) {
   return (
     <SidebarGroup>
       <SidebarGroupContent>
-        <SidebarMenu className="space-y-0.5">
+        <SidebarMenu className="gap-1">
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 tooltip={item.title}
                 isActive={pathname === item.url}
-                className="text-foreground/70 dark:text-muted-foreground data-active:text-foreground"
+                className="h-10! rounded-xl px-2.5! text-foreground/70 data-active:bg-primary/10 data-active:font-semibold data-active:text-primary dark:text-muted-foreground"
                 render={<Link to={item.url} />}
               >
                 {item.icon}

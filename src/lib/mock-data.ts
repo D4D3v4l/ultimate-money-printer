@@ -18,6 +18,35 @@ export const student = {
 }
 
 /* -------------------------------------------------------------------------- */
+/* Mascotas de amistad                                                        */
+/* -------------------------------------------------------------------------- */
+
+export type Mascot = {
+  id: string
+  name: string
+  emoji: string
+  role: string
+  level: number
+}
+
+export const mascots: Mascot[] = [
+  {
+    id: "conejo",
+    name: "Conejo",
+    emoji: "🐰",
+    role: "Explorador de fracciones",
+    level: 3,
+  },
+  {
+    id: "alce",
+    name: "Alce",
+    emoji: "🫎",
+    role: "Guardián del botín",
+    level: 2,
+  },
+]
+
+/* -------------------------------------------------------------------------- */
 /* Mi Portal                                                                   */
 /* -------------------------------------------------------------------------- */
 
