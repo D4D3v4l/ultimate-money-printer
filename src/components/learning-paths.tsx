@@ -351,23 +351,18 @@ function StoryRow({ story }: { story: Story }) {
         </div>
       </div>
 
-      <StoryAction status={story.status} />
+      <StoryAction story={story} />
     </li>
   );
 }
 
-/** Acción de la historia según su estado. */
-function StoryAction({ status }: { status: Story["status"] }) {
-  if (status === "done") {
-    return (
-      <Badge variant="secondary" className="shrink-0 self-start sm:self-auto">
-        <CheckIcon data-icon="inline-start" />
-        {routesSection.statusLabels.completed}
-      </Badge>
-    );
-  }
-
-  if (status === "locked") {
+/**
+ * Acción de la historia según su estado. Toda historia jugable -en curso o ya
+ * completada- lleva a su misión en `/misiones`; la búsqueda por `historia` hace
+ * que se abra esa y no la primera. Las bloqueadas siguen sin enlace.
+ */
+function StoryAction({ story }: { story: Story }) {
+  if (story.status === "locked") {
     return (
       <Button size="sm" disabled className="shrink-0 self-start sm:self-auto">
         <LockIcon data-icon="inline-start" />
@@ -376,10 +371,24 @@ function StoryAction({ status }: { status: Story["status"] }) {
     );
   }
 
+  if (story.status === "done") {
+    return (
+      <Button
+        size="sm"
+        variant="secondary"
+        render={<Link to="/misiones" search={{ historia: story.id }} />}
+        className="shrink-0 self-start sm:self-auto"
+      >
+        <CheckIcon data-icon="inline-start" />
+        {routesSection.statusLabels.completed}
+      </Button>
+    );
+  }
+
   return (
     <Button
       size="sm"
-      render={<Link to="/diagnostic" />}
+      render={<Link to="/misiones" search={{ historia: story.id }} />}
       className="shrink-0 self-start sm:self-auto"
     >
       <PlayIcon data-icon="inline-start" />
