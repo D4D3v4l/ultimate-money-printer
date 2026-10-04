@@ -275,15 +275,7 @@ function DiagnosticCallout() {
             className="flex items-center justify-between gap-2"
           >
             <span className="text-xs text-muted-foreground">{item.label}</span>
-            <span
-              className={
-                item.pending
-                  ? "text-xs font-semibold text-primary"
-                  : "text-xs font-semibold"
-              }
-            >
-              {item.value}
-            </span>
+            <span className="text-xs font-semibold">{item.value}</span>
           </div>
         ))}
       </div>

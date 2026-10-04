@@ -61,7 +61,6 @@ export const portal = {
     meta: [
       { label: "Preguntas", value: "12 reactivos" },
       { label: "Modalidad", value: "Ritmo libre" },
-      { label: "Estado actual", value: "Pendiente", pending: true },
     ],
     emptyProgressNote:
       "Sin intentos registrados hoy. Al dar clic inicias el primer ejercicio.",
