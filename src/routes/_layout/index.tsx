@@ -20,7 +20,6 @@ import {
   learningPath,
   portal,
   routesSection,
-  student,
   themeRoutes,
   topicSearch,
   tutors,
@@ -36,7 +35,6 @@ import {
   CalendarDaysIcon,
   CheckIcon,
   ClockIcon,
-  CompassIcon,
   LockIcon,
   PieChartIcon,
   PlayIcon,
@@ -90,7 +88,9 @@ function MissionMap() {
   const [topic, setTopic] = useState("");
 
   const allStories = themeRoutes.flatMap((route) => route.stories);
-  const doneStories = allStories.filter((story) => story.status === "done").length;
+  const doneStories = allStories.filter(
+    (story) => story.status === "done",
+  ).length;
   const overallProgress = Math.round((doneStories / allStories.length) * 100);
   /** Las rutas en curso se abren por defecto para no esconder el siguiente paso. */
   const openRouteIds = themeRoutes
@@ -114,37 +114,6 @@ function MissionMap() {
 
   return (
     <>
-      {/* Saludo */}
-      <section className="flex flex-col gap-4 border-b border-border/60 pb-4 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-1">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold tracking-wider text-primary uppercase">
-              {student.cycle}
-            </span>
-            <span className="text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">
-              {student.grade}
-            </span>
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">
-            ¡Hola, {student.name}!
-          </h1>
-          <p className="max-w-2xl text-sm text-muted-foreground md:text-base">
-            Hay una ruta por tema. Abre la que estés trabajando y continúa justo
-            donde la dejaste.
-          </p>
-        </div>
-        <div className="flex w-fit items-center gap-2 self-start rounded-xl bg-card px-4 py-2 ring-1 ring-foreground/10 md:self-auto">
-          <CompassIcon className="size-4 text-primary" />
-          <span className="text-xs font-medium text-muted-foreground">
-            Estado:{" "}
-            <strong className="font-semibold text-foreground">
-              {portal.phase}
-            </strong>
-          </span>
-        </div>
-      </section>
-
       {/* Buscador de tema libre */}
       <Card
         size="sm"
@@ -199,8 +168,7 @@ function MissionMap() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>
-                {doneStories} de {allStories.length}{" "}
-                {routesSection.storiesUnit}
+                {doneStories} de {allStories.length} {routesSection.storiesUnit}
               </span>
               <span className="font-medium text-foreground">
                 {overallProgress}% completado
@@ -255,9 +223,9 @@ function TopicSearchForm({
   onTopicChange,
   onSubmit,
 }: {
-  topic: string
-  onTopicChange: (value: string) => void
-  onSubmit: (value: string) => void
+  topic: string;
+  onTopicChange: (value: string) => void;
+  onSubmit: (value: string) => void;
 }) {
   return (
     <form
@@ -274,11 +242,7 @@ function TopicSearchForm({
         aria-label={topicSearch.label}
         className="md:h-10 md:text-base"
       />
-      <Button
-        type="submit"
-        size="lg"
-        className="h-10 shrink-0 px-4 md:w-auto"
-      >
+      <Button type="submit" size="lg" className="h-10 shrink-0 px-4 md:w-auto">
         {topicSearch.action}
       </Button>
     </form>
@@ -330,7 +294,10 @@ function DiagnosticCallout() {
 
       <div className="flex w-full flex-col justify-center gap-2 border-t bg-muted/60 p-4 lg:w-64 lg:shrink-0 lg:border-t-0 lg:border-l">
         {diagnostic.meta.map((item) => (
-          <div key={item.label} className="flex items-center justify-between gap-2">
+          <div
+            key={item.label}
+            className="flex items-center justify-between gap-2"
+          >
             <span className="text-xs text-muted-foreground">{item.label}</span>
             <span
               className={
