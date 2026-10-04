@@ -667,8 +667,14 @@ export const learningPath = {
 export type RouteIcon = "fraction" | "reading" | "problems"
 
 /**
- * Estado de una historia. El estado de la ruta se deriva de sus historias, no
- * se almacena: así es imposible que ambos se desincronicen.
+ * Estado de una historia.
+ *
+ * Las rutas NO son secuenciales entre sí: se puede abrir cualquiera. El
+ * bloqueo es solo dentro de una ruta, donde las historias sí se encadenan
+ * ("current" es la siguiente jugable, "locked" las que esperan turno).
+ *
+ * El estado de la ruta se deriva de sus historias, no se almacena: así es
+ * imposible que ambos se desincronicen.
  */
 export type StoryStatus = "done" | "current" | "locked"
 
@@ -707,12 +713,13 @@ export const routesSection = {
   eyebrow: "Rutas por tema",
   title: "Tu Ruta de Misiones",
   description:
-    "Hay una ruta por tema. Abre la que estés trabajando para ver las historias que necesitas hacer y continúa justo donde la dejaste.",
+    "Hay una ruta por tema y puedes abrir la que quieras. Dentro de cada ruta, las historias van una detrás de otra: completa una para desbloquear la siguiente.",
   storiesUnit: "historias",
   viewAllAction: "Ver ruta completa",
   statusLabels: {
     active: "En curso",
     completed: "Completada",
+    /** Estado de una historia, no de la ruta: las rutas no se bloquean. */
     locked: "Bloqueada",
   },
 }
@@ -770,7 +777,7 @@ export const themeRoutes: ThemeRoute[] = [
         title: "Jugaron bajo la lluvia",
         description:
           "El grupo decidió jugar con la lluvia encima. ¿Qué nos dice esa decisión?",
-        status: "locked",
+        status: "current",
         duration: "8 min",
         points: 20,
       },
@@ -808,7 +815,7 @@ export const themeRoutes: ThemeRoute[] = [
         title: "La excursión de la clase",
         description:
           "Calcula el costo de los cuadernos y los lápices, y cuánto paga cada alumno.",
-        status: "locked",
+        status: "current",
         duration: "10 min",
         points: 25,
       },

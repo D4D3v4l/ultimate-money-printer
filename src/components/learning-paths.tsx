@@ -5,7 +5,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Avatar, AvatarFallback, AvatarGroup } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +23,6 @@ import {
   student,
   themeRoutes,
   topicSearch,
-  tutors,
   type RouteIcon,
   type Story,
   type ThemeRoute,
@@ -34,7 +32,6 @@ import {
   ArrowRightIcon,
   BlocksIcon,
   BookOpenCheckIcon,
-  CalendarDaysIcon,
   CheckIcon,
   ClockIcon,
   LockIcon,
@@ -55,31 +52,28 @@ const routeIcons: Record<RouteIcon, LucideIcon> = {
   problems: BlocksIcon,
 };
 
-/** Variante de `Badge` según el estado derivado de la ruta. */
+/**
+ * Variante de `Badge` según el estado de la ruta.
+ *
+ * Una ruta nunca está "bloqueada": los temas son independientes y siempre se
+ * puede abrir el que quieras. El bloqueo solo existe entre historias.
+ */
 const routeStatusVariants = {
   active: "default",
   completed: "secondary",
-  locked: "outline",
 } as const;
 
 type RouteStatus = keyof typeof routeStatusVariants;
 
 /**
  * Estado de la ruta derivado de sus historias: completada si todas están
- * hechas, en curso si hay algo empezado y bloqueada si ninguna se ha abierto.
- * No se guarda en los datos para que ambos nunca se desincronicen.
+ * hechas y en curso en cualquier otro caso. No se guarda en los datos para que
+ * ambos nunca se desincronicen.
  */
 function getRouteStatus(route: ThemeRoute): RouteStatus {
   const done = route.stories.filter((story) => story.status === "done").length;
 
-  if (done === route.stories.length) {
-    return "completed";
-  }
-
-  const started =
-    done > 0 || route.stories.some((story) => story.status === "current");
-
-  return started ? "active" : "locked";
+  return done === route.stories.length ? "completed" : "active";
 }
 
 /**
@@ -102,10 +96,11 @@ export function LearningPaths() {
     (story) => story.status === "done",
   ).length;
   const overallProgress = Math.round((doneStories / allStories.length) * 100);
-  /** Las rutas en curso se abren por defecto para no esconder el siguiente paso. */
-  const openRouteIds = themeRoutes
-    .filter((route) => getRouteStatus(route) === "active")
-    .map((route) => route.id);
+  /**
+   * Como las rutas son independientes, se abren todas por defecto: si una
+   * bloquea a otra, el alumno no puede avanzar y no ve lo que tiene pendiente.
+   */
+  const openRouteIds = themeRoutes.map((route) => route.id);
 
   /** Valida el tema y confirma la misión; la historia se generará en el juego. */
   function handleTopicSubmit(value: string) {
@@ -149,8 +144,8 @@ export function LearningPaths() {
       <DiagnosticCallout />
 
       {/* Rutas por tema: un acordeón por ruta, con sus historias dentro */}
-      <Card className="gap-0 p-0">
-        <CardHeader className="border-b">
+      <Card>
+        <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <span className="text-xs font-semibold tracking-wider text-primary uppercase">
@@ -197,34 +192,6 @@ export function LearningPaths() {
               size="lg"
               label={learningPath.progress.label}
             />
-          </div>
-
-          {/* Tutores que acompañan las rutas */}
-          <div className="flex flex-col gap-2 rounded-xl bg-muted/60 p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <AvatarGroup>
-                {tutors.map((tutor) => (
-                  <Avatar key={tutor.id} className="size-8">
-                    <AvatarFallback className="text-[0.65rem] font-semibold">
-                      {tutor.initials}
-                    </AvatarFallback>
-                  </Avatar>
-                ))}
-              </AvatarGroup>
-              <div>
-                <span className="block text-sm font-medium">
-                  Tus tutores guía
-                </span>
-                <span className="block text-xs text-muted-foreground">
-                  {tutors.map((tutor) => tutor.name).join(" y ")} te acompañan
-                  tema por tema.
-                </span>
-              </div>
-            </div>
-            <span className="flex w-fit items-center gap-1.5 rounded-lg bg-card px-3 py-1.5 text-xs text-muted-foreground ring-1 ring-foreground/10">
-              <CalendarDaysIcon className="size-4 text-primary" />
-              {learningPath.weekly.detail}
-            </span>
           </div>
         </CardContent>
       </Card>
@@ -347,7 +314,7 @@ function RouteItem({ route }: { route: ThemeRoute }) {
         <span className="flex min-w-0 flex-1 flex-col">
           <span className="truncate">{route.theme}</span>
           <span className="truncate text-xs font-normal text-muted-foreground">
-            {route.subject} • {route.tutor} • {done}/{route.stories.length}{" "}
+            {route.subject} • {done}/{route.stories.length}{" "}
             {routesSection.storiesUnit}
           </span>
         </span>
