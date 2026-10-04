@@ -12,13 +12,14 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Fragment } from "react";
 
 /** Rutas de primer nivel de la plataforma. */
-type KnownPath = "/" | "/diagnostic" | "/results" | "/learning-path";
+type KnownPath = "/" | "/diagnostic" | "/results" | "/learning-path" | "/misiones";
 
 const pathLabels: Record<KnownPath, string> = {
   "/": "Mi Portal",
   "/diagnostic": "Diagnóstico",
   "/results": "Resultados y Brechas",
   "/learning-path": "Ruta de Aprendizaje",
+  "/misiones": "Misiones",
 };
 
 /**

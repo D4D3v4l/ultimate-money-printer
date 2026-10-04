@@ -1,3 +1,4 @@
+import { usePetFriendship } from "@/components/pet-friendship";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -10,10 +11,13 @@ import { HeartIcon, SparklesIcon } from "lucide-react";
 
 /**
  * Widget "Amistad Mascotas" del prototipo, adaptado al lenguaje visual del
- * proyecto (superficies neutras + acento `primary`). Al colapsar la sidebar
- * solo quedan los emojis, para no perder la referencia de las mascotas.
+ * proyecto (superficies neutras + acento `primary`). El nivel vive en el
+ * contexto `PetFriendship`, así que sube al completar misiones. Al colapsar la
+ * sidebar solo quedan los emojis, para no perder la referencia de las mascotas.
  */
 export function NavPets() {
+  const { levels } = usePetFriendship();
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel className="text-[0.65rem] font-semibold tracking-widest uppercase">
@@ -40,7 +44,7 @@ export function NavPets() {
                   </span>
                 </span>
                 <span className="shrink-0 rounded-md bg-primary/10 px-1.5 py-0.5 font-mono text-xs font-semibold tabular-nums text-primary group-data-[collapsible=icon]:hidden">
-                  Nv. {mascot.level}
+                  Nv. {levels[mascot.name] ?? mascot.level}
                 </span>
               </div>
             </SidebarMenuItem>
