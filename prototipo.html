@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AprendeAventura - Rutas de Aprendizaje</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #FF6B6B;
+      --secondary: #4ECDC4;
+      --purple: #6C5CE7;
+      --yellow: #FFE66D;
+      --green: #2ECC71;
+      --bg-light: #F8FAFC;
+      --sidebar-expanded: 260px;
+      --sidebar-collapsed: 80px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--bg-light);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+      color: #2D3436;
+    }
+
+    /* ================= SIDEBAR ================= */
+    .sidebar {
+      width: var(--sidebar-expanded);
+      background: white;
+      border-right: 2px solid #E2E8F0;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 15px;
+      justify-content: space-between;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 10;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.02);
+    }
+    .sidebar.collapsed { width: var(--sidebar-collapsed); padding: 20px 10px; }
+
+    .toggle-btn {
+      position: absolute; top: 25px; right: -15px;
+      background: var(--purple); color: white; border: none;
+      width: 30px; height: 30px; border-radius: 50%;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-weight: bold; box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: transform 0.3s;
+    }
+    .sidebar.collapsed .toggle-btn { transform: rotate(180deg); }
+
+    .brand {
+      display: flex; align-items: center; gap: 12px;
+      font-family: 'Fredoka', cursive; font-size: 1.4rem; color: var(--purple);
+      overflow: hidden; white-space: nowrap; margin-bottom: 25px;
+    }
+
+    .nav-list { display: flex; flex-direction: column; gap: 10px; list-style: none; }
+    .nav-item {
+      display: flex; align-items: center; gap: 15px;
+      padding: 12px 16px; border-radius: 16px; cursor: pointer;
+      color: #64748B; font-weight: 700; transition: all 0.2s;
+      white-space: nowrap; overflow: hidden;
+    }
+    .nav-item:hover, .nav-item.active { background: #F3E8FF; color: var(--purple); }
+    .nav-icon { font-size: 1.4rem; min-width: 30px; text-align: center; }
+
+    /* Mascotas en Sidebar */
+    .pets-widget {
+      background: linear-gradient(135deg, #FFF5F5, #FED7D7);
+      border: 2px solid #FEB2B2; border-radius: 20px;
+      padding: 15px; margin: 15px 0; overflow: hidden;
+    }
+    .pets-widget-title { font-size: 0.75rem; font-weight: 800; color: #9B2C2C; text-transform: uppercase; margin-bottom: 8px; display: flex; justify-content: space-between; }
+    .pet-row { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem; font-weight: 700; }
+
+    .sidebar.collapsed .hide-on-collapse, .sidebar.collapsed .pets-widget { display: none; }
+    .mini-pet-badge { display: none; background: #FED7D7; border-radius: 12px; padding: 8px 0; text-align: center; font-size: 1.2rem; margin: 10px 0; }
+    .sidebar.collapsed .mini-pet-badge { display: block; }
+
+    .profile-section { display: flex; align-items: center; gap: 12px; padding-top: 15px; border-top: 2px solid #F1F5F9; white-space: nowrap; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: #E2E8F0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+
+    /* ================= MAIN WORKSPACE ================= */
+    .main-content { flex: 1; padding: 30px 40px; overflow-y: auto; }
+    .screen-view { display: none; animation: fadeIn 0.3s ease-in-out; }
+    .screen-view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Buscador Tema Libre */
+    .search-topic-box {
+      background: white; border: 3px solid #E2E8F0; border-radius: 24px;
+      padding: 16px 22px; display: flex; gap: 15px; align-items: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02); margin-bottom: 30px;
+    }
+    .search-input {
+      flex: 1; border: none; outline: none; font-family: 'Nunito', sans-serif;
+      font-size: 1.05rem; font-weight: 700; color: #2D3436;
+    }
+    .btn-magic {
+      background: var(--purple); color: white; border: none;
+      padding: 10px 20px; border-radius: 14px; font-family: 'Fredoka', cursive;
+      font-size: 1rem; cursor: pointer; transition: transform 0.2s;
+    }
+    .btn-magic:hover { transform: scale(1.03); }
+
+    /* ================= NUEVA ESTRUCTURA DE RUTAS DE APRENDIZAJE ================= */
+    .route-unit-card {
+      background: white;
+      border: 3px solid #E2E8F0;
+      border-radius: 28px;
+      padding: 24px;
+      margin-bottom: 35px;
+      box-shadow: 0 8px 0 #E2E8F0;
+    }
+
+    /* Cabecera / Título Grande de la Ruta */
+    .route-header-pill {
+      background: linear-gradient(135deg, #6C5CE7, #8075E5);
+      color: white;
+      border-radius: 20px;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      box-shadow: 0 5px 0 #4C51BF;
+    }
+    .route-title-badge {
+      background: rgba(255, 255, 255, 0.25);
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    /* Contenedor de Tarjetas Chicas (Lecciones) */
+    .lessons-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .lesson-card {
+      background: #F8FAFC;
+      border: 2px solid #E2E8F0;
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .lesson-card:hover:not(.locked) {
+      background: white;
+      border-color: var(--purple);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.1);
+    }
+    .lesson-card.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #EDF2F7;
+    }
+
+    .lesson-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .lesson-icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: white;
+      border: 2px solid #CBD5E1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    /* Barra de Progreso Interna */
+    .mini-progress-bar {
+      width: 140px;
+      height: 10px;
+      background: #E2E8F0;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+    .mini-progress-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 20px;
+    }
+
+    .status-tag {
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.85rem;
+    }
+    .status-tag.completed { background: #DEF7EC; color: #03543F; }
+    .status-tag.active { background: #FEF08A; color: #713F12; }
+    .status-tag.locked { background: #E2E8F0; color: #64748B; }
+
+    /* Tareas Profesor y Demás */
+    .task-card {
+      background: white; border-radius: 24px; padding: 22px; margin-bottom: 20px;
+      border: 3px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 6px 0 #E2E8F0;
+    }
+
+    /* Juego Canvas */
+    .game-container {
+      background: white; border-radius: 30px; border: 3px solid #E2E8F0;
+      padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+    }
+    .game-stage {
+      background: #F7FAFC; border: 2px dashed #CBD5E1; border-radius: 24px;
+      min-height: 220px; display: flex; justify-content: space-around; align-items: center; padding: 20px; margin-bottom: 20px;
+    }
+    .story-bubble {
+      background: #EDF2F7; padding: 18px 24px; border-radius: 20px;
+      font-weight: 700; font-size: 1.1rem; margin-bottom: 25px; border-left: 5px solid var(--purple);
+    }
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+    .option-btn {
+      background: white; border: 3px solid #E2E8F0; border-radius: 18px; padding: 16px;
+      font-size: 1.05rem; font-weight: 800; cursor: pointer; text-align: left;
+      transition: all 0.2s; box-shadow: 0 4px 0 #E2E8F0;
+    }
+    .option-btn:hover { border-color: var(--purple); color: var(--purple); }
+
+    .tutor-bar {
+      background: #FFF5F5; border: 2px dashed #FC8181; border-radius: 20px;
+      padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
+    <button class="toggle-btn" onclick="toggleSidebar()">◀</button>
+
+    <div>
+      <div class="brand">
+        <span>🚀</span>
+        <span class="hide-on-collapse">AprendeAventura</span>
+      </div>
+
+      <ul class="nav-list">
+        <li class="nav-item active" onclick="switchScreen('inicio', this)">
+          <span class="nav-icon">🏠</span>
+          <span class="hide-on-collapse">Rutas de Misiones</span>
+        </li>
+        <li class="nav-item" onclick="switchScreen('tareas', this)">
+          <span class="nav-icon">📝</span>
+          <span class="hide-on-collapse">Tareas del Profe</span>
+        </li>
+        <li class="nav-item" onclick="switchScreen('biblioteca', this)">
+          <span class="nav-icon">📚</span>
+          <span class="hide-on-collapse">Mi Biblioteca</span>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <!-- Mascotas -->
+      <div class="pets-widget">
+        <div class="pets-widget-title">
+          <span>AMISTAD MASCOTAS</span>
+          <span>❤️️</span>
+        </div>
+        <div class="pet-row">
+          <span>🐰 Conejo</span>
+          <span style="color: #E53E3E;" id="lvl-conejo">Lvl 3</span>
+        </div>
+        <div class="pet-row">
+          <span>🫎 Alce</span>
+          <span style="color: #E53E3E;" id="lvl-alce">Lvl 2</span>
+        </div>
+      </div>
+
+      <div class="mini-pet-badge" title="Conejo Lvl 3 | Alce Lvl 2">🐰❤️</div>
+
+      <div class="profile-section">
+        <div class="avatar">👦</div>
+        <div class="hide-on-collapse">
+          <p style="font-weight: 800; font-size: 0.95rem;">Mateo</p>
+          <small style="color: #94A3B8;">4.° Primaria</small>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= WORKSPACE PRINCIPAL ================= -->
+  <main class="main-content">
+
+    <!-- 1. PANTALLA: INICIO (CON LAS NUEVAS RUTAS Y CARDS) -->
+    <section id="screen-inicio" class="screen-view active">
+      <h1 style="font-family: 'Fredoka'; font-size: 2.2rem; margin-bottom: 20px;">Tus Rutas de Aprendizaje 🗺️</h1>
+
+      <!-- Buscador de Tema Libre -->
+      <div class="search-topic-box">
+        <span style="font-size: 1.4rem;">✨</span>
+        <input type="text" id="topic-input" class="search-input" placeholder="Escribe un tema libre para aprender hoy (ej: Los Dinosaurios, Piratas)...">
+        <button class="btn-magic" onclick="searchFreeTopic()">¡Crear Misión!</button>
+      </div>
+
+      <!-- ================= RUTA GRANDE 1 ================= -->
+      <div class="route-unit-card">
+        <!-- Título Principal de la Ruta -->
+        <div class="route-header-pill">
+          <div>
+            <span class="route-title-badge">MÓDULO 1</span>
+            <h2 style="font-family: 'Fredoka'; font-size: 1.6rem; margin-top: 4px;">🍕 Fracciones y Repartos en Alta Mar</h2>
+          </div>
+          <span style="font-weight: 800; opacity: 0.9;">2 / 3 Completados</span>
+        </div>
+
+        <!-- Lista de Tarjetas Chicas (Temas/Lecciones) -->
+        <div class="lessons-stack">
+          <!-- Card 1: Completada -->
+          <div class="lesson-card" onclick="launchGame('Lección 1: Repartiendo Pizzas con el Alce', 'pizza')">
+            <div class="lesson-left">
+              <div class="lesson-icon-box">🍕</div>
+              <div>
+                <h3 style="font-family: 'Fredoka'; font-size: 1.1rem;">Lección 1: Las Pizzas del Alce</h3>
+                <small style="color: #64748B; font-weight: 700;">Aprende qué es la mitad y un tercio</small>
+              </div>
+            </div>
+            <span class="status-tag completed">✅ Completado</span>
+          </div>
+
+          <!-- Card 2: En Progreso (Barra dentro) -->
+          <div class="lesson-card" onclick="launchGame('Lección 2: Monedas y Botines Piratas', 'treasure')">
+            <div class="lesson-left">
+              <div class="lesson-icon-box">🏴‍☠️</div>
+              <div>
+                <h3 style="font-family: 'Fredoka'; font-size: 1.1rem;">Lección 2: Monedas y Botines</h3>
+                <div class="mini-progress-bar" title="Progreso 50%">
+                  <div class="mini-progress-fill" style="width: 50%;"></div>
+                </div>
+              </div>
+            </div>
+            <span class="status-tag active">▶ Continuar</span>
+          </div>
+
+          <!-- Card 3: Bloqueada -->
+          <div class="lesson-card locked">
+            <div class="lesson-left">
+              <div class="lesson-icon-box">🔒</div>
+              <div>
+                <h3 style="font-family: 'Fredoka'; font-size: 1.1rem; color: #64748B;">Lección 3: La Fiesta de Tartas</h3>
+                <small style="color: #94A3B8; font-weight: 700;">Suma de fracciones simples</small>
+              </div>
+            </div>
+            <span class="status-tag locked">Bloqueado</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= RUTA GRANDE 2 ================= -->
+      <div class="route-unit-card">
+        <!-- Título Principal de la Ruta 2 -->
+        <div class="route-header-pill" style="background: linear-gradient(135deg, #059669, #10B981); box-shadow: 0 5px 0 #047857;">
+          <div>
+            <span class="route-title-badge">MÓDULO 2</span>
+            <h2 style="font-family: 'Fredoka'; font-size: 1.6rem; margin-top: 4px;">🚀 Geometría y Cuerpos del Espacio</h2>
+          </div>
+          <span style="font-weight: 800; opacity: 0.9;">0 / 2 Completados</span>
+        </div>
+
+        <div class="lessons-stack">
+          <!-- Card 1 -->
+          <div class="lesson-card" onclick="launchGame('Lección 1: Figuras Geométricas en la Nave', 'space')">
+            <div class="lesson-left">
+              <div class="lesson-icon-box">🪐</div>
+              <div>
+                <h3 style="font-family: 'Fredoka'; font-size: 1.1rem;">Lección 1: Las Formas de la Estación</h3>
+                <small style="color: #64748B; font-weight: 700;">Reconoce prismas, esferas y cubos</small>
+              </div>
+            </div>
+            <span class="status-tag active">▶ Empezar</span>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="lesson-card locked">
+            <div class="lesson-left">
+              <div class="lesson-icon-box">🔒</div>
+              <div>
+                <h3 style="font-family: 'Fredoka'; font-size: 1.1rem; color: #64748B;">Lección 2: Construyendo Cohetes</h3>
+                <small style="color: #94A3B8; font-weight: 700;">Calcula el perímetro de las naves</small>
+              </div>
+            </div>
+            <span class="status-tag locked">Bloqueado</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 2. PANTALLA: TAREAS DEL PROFESOR -->
+    <section id="screen-tareas" class="screen-view">
+      <h1 style="font-family: 'Fredoka'; font-size: 2rem; margin-bottom: 10px;">📝 Tareas del Profesor</h1>
+      <p style="color: #64748B; margin-bottom: 25px;">Actividades asignadas por tu profesor real mediante prompts.</p>
+
+      <div class="task-card">
+        <div>
+          <span style="background: #EBF8FF; color: #2B6CB0; padding: 4px 12px; border-radius: 10px; font-weight: 800; font-size: 0.8rem;">Prof. Carlos</span>
+          <h2 style="font-family: 'Fredoka'; margin-top: 6px;">El Reparto del Botín Pirata</h2>
+          <p style="color: #718096; margin-top: 4px; font-size: 0.95rem;">Resuelve cómo repartir las monedas entre los marineros.</p>
+        </div>
+        <button class="btn-magic" onclick="launchGame('El Reparto del Botín Pirata', 'treasure')">¡Resolver Tarea!</button>
+      </div>
+    </section>
+
+    <!-- 3. PANTALLA: ESCENARIO DE JUEGO / HISTORIA EN VIVO -->
+    <section id="screen-juego" class="screen-view">
+      <div class="game-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <button style="background: #EDF2F7; border: none; padding: 8px 16px; border-radius: 12px; font-weight: 800; cursor: pointer;" onclick="switchScreen('inicio')">⬅ Volver a las Rutas</button>
+          <h2 id="game-title" style="font-family: 'Fredoka'; color: var(--purple);">Misión Interactiva</h2>
+          <span style="background: var(--yellow); padding: 6px 14px; border-radius: 20px; font-weight: 800; color: #D68910;">⭐ +20 Pts</span>
+        </div>
+
+        <div class="game-stage">
+          <!-- Conejo SVG -->
+          <svg style="width: 80px; height: 100px;" viewBox="0 0 100 120">
+            <ellipse cx="50" cy="80" rx="30" ry="35" fill="#FFE066" stroke="#8B5A2B" stroke-width="3"/>
+            <ellipse cx="50" cy="45" rx="32" ry="28" fill="#FFE066" stroke="#8B5A2B" stroke-width="3"/>
+            <ellipse cx="38" cy="18" rx="8" ry="22" fill="#FFE066" stroke="#8B5A2B" stroke-width="3"/>
+            <ellipse cx="62" cy="18" rx="8" ry="22" fill="#FFE066" stroke="#8B5A2B" stroke-width="3"/>
+            <circle cx="40" cy="42" r="5" fill="#2D3436"/><circle cx="60" cy="42" r="5" fill="#2D3436"/>
+          </svg>
+
+          <!-- Prop pizza/tesoro -->
+          <div style="text-align: center;">
+            <svg viewBox="0 0 100 100" style="width: 120px; height: 120px;">
+              <circle cx="50" cy="50" r="45" fill="#E28743" stroke="#B3541E" stroke-width="3"/>
+              <path d="M 50 50 L 50 5 A 45 45 0 0 1 89 27.5 Z" fill="#FFF5E6" stroke="#CBD5E1" stroke-dasharray="2"/>
+              <path d="M 50 50 L 89 27.5 A 45 45 0 0 1 89 72.5 Z" fill="#FFF5E6" stroke="#CBD5E1" stroke-dasharray="2"/>
+              <path d="M 50 50 L 89 72.5 A 45 45 0 0 1 50 95 Z" fill="#FFF5E6" stroke="#CBD5E1" stroke-dasharray="2"/>
+              <path d="M 50 50 L 50 95 A 45 45 0 0 1 11 72.5 Z" fill="#FFD166" stroke="#B3541E" stroke-width="1.5"/>
+              <path d="M 50 50 L 11 72.5 A 45 45 0 0 1 11 27.5 Z" fill="#FFD166" stroke="#B3541E" stroke-width="1.5"/>
+              <path d="M 50 50 L 11 27.5 A 45 45 0 0 1 50 5 Z" fill="#FFD166" stroke="#B3541E" stroke-width="1.5"/>
+            </svg>
+          </div>
+
+          <!-- Alce SVG -->
+          <svg style="width: 80px; height: 100px;" viewBox="0 0 100 140">
+            <rect x="35" y="50" width="30" height="70" rx="15" fill="#FF85A1" stroke="#8B0000" stroke-width="3"/>
+            <rect x="30" y="25" width="40" height="30" rx="10" fill="#FF85A1" stroke="#8B0000" stroke-width="3"/>
+            <path d="M 25 25 Q 15 10 10 20" fill="none" stroke="#FFE066" stroke-width="5" stroke-linecap="round"/>
+            <path d="M 75 25 Q 85 10 90 20" fill="none" stroke="#FFE066" stroke-width="5" stroke-linecap="round"/>
+          </svg>
+        </div>
+
+        <div id="story-text" class="story-bubble">
+          "El Alce y el Conejo compraron una pizza dividida en 6 partes iguales. El Conejo se comió 3 porciones. ¿Qué fracción de la pizza se comió en total?"
+        </div>
+
+        <div class="options-grid">
+          <button class="option-btn" onclick="checkAnswer(true)">A) 3/6 (Tres sextos o la mitad)</button>
+          <button class="option-btn" onclick="checkAnswer(false)">B) 1/3 (Un tercio)</button>
+          <button class="option-btn" onclick="checkAnswer(false)">C) 3/4 (Tres cuartos)</button>
+          <button class="option-btn" onclick="checkAnswer(false)">D) 2/6 (Dos sextos)</button>
+        </div>
+
+        <!-- Perro Tutor Socrático -->
+        <div class="tutor-bar">
+          <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-size: 2rem;">🐶</span>
+            <div>
+              <p style="font-weight: 800; font-size: 0.95rem;">Profe Perro Tutor</p>
+              <small style="color: #718096;">¿Necesitas ayuda para resolver la lección?</small>
+            </div>
+          </div>
+          <button style="background: white; border: 2px solid #FC8181; color: #C53030; font-weight: 800; padding: 8px 16px; border-radius: 14px; cursor: pointer;" onclick="alert('🐶 Pista: Cuenta cuántas rebanadas en total hay (abajo) y cuántas se comió el Conejo (arriba).')">🔍 Pedir Pista</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. PANTALLA: BIBLIOTECA -->
+    <section id="screen-biblioteca" class="screen-view">
+      <h1 style="font-family: 'Fredoka'; font-size: 2rem; margin-bottom: 10px;">📚 Mi Biblioteca</h1>
+      <p style="color: #64748B;">Historias guardadas para repasar cuando quieras.</p>
+    </section>
+
+  </main>
+
+  <script>
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    function switchScreen(screenId, navElement) {
+      document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + screenId).classList.add('active');
+
+      if (navElement) {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        navElement.classList.add('active');
+      }
+    }
+
+    function searchFreeTopic() {
+      const topic = document.getElementById('topic-input').value.trim();
+      if (!topic) return alert("¡Escribe un tema para crear una lección!");
+      launchGame("Lección Especial: " + topic, "custom");
+    }
+
+    function launchGame(title, type) {
+      switchScreen('juego');
+      document.getElementById('game-title').innerText = title;
+      const storyBox = document.getElementById('story-text');
+      
+      if (type === 'treasure') {
+        storyBox.innerText = "El Capitán Alce encontró 12 monedas de oro. Quieren repartir las 12 monedas en partes iguales entre el Conejo, el Alce y el Perro Tutor. ¿Cuántas monedas le tocan a cada uno?";
+      } else if (type === 'space') {
+        storyBox.innerText = "El Conejo observó una ventana espacial con forma de círculo perfecto de radio 3m. ¿Cuál es la forma de la ventana?";
+      } else {
+        storyBox.innerText = "El Alce y el Conejo compraron una pizza dividida en 6 partes iguales. El Conejo se comió 3 porciones. ¿Qué fracción se comió?";
+      }
+    }
+
+    function checkAnswer(isCorrect) {
+      if (isCorrect) {
+        alert("🎉 ¡Respuesta Correcta! Subiste de nivel de amistad con el Conejo y el Alce.");
+        document.getElementById('lvl-conejo').innerText = "Lvl 4";
+        document.getElementById('lvl-alce').innerText = "Lvl 3";
+        switchScreen('inicio');
+      } else {
+        alert("💡 ¡Inténtalo de nuevo o pide una pista al Profe Perro!");
+      }
+    }
+  </script>
+</body>
+</html>
