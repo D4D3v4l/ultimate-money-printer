@@ -242,15 +242,6 @@ function DiagnosticCallout() {
   return (
     <Card className="gap-0 p-0 lg:flex-row lg:items-stretch lg:justify-between">
       <div className="flex flex-1 flex-col gap-3 p-4 lg:p-6">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="default" className="uppercase">
-            {diagnostic.recommendation}
-          </Badge>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <ClockIcon className="size-3.5" />
-            {diagnostic.estimatedTime}
-          </span>
-        </div>
         <h2 className="text-xl font-semibold md:text-2xl">
           {diagnostic.title}
         </h2>

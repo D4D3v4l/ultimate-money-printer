@@ -54,8 +54,6 @@ export const portal = {
   phase: "Fase de Diagnóstico",
   diagnostic: {
     badge: "Paso obligatorio",
-    recommendation: "Recomendado",
-    estimatedTime: "25 min aprox.",
     title: "Test de Diagnóstico Inicial",
     description:
       "12 reactivos interactivos diseñados para identificar tus competencias actuales en Matemáticas y Comprensión Lectora. Esta prueba no tiene límite de tiempo estricto y servirá para calibrar tu ritmo de aprendizaje.",
