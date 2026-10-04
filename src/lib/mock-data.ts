@@ -25,6 +25,7 @@ export const portal = {
   phase: "Fase de Diagnóstico",
   diagnostic: {
     badge: "Paso obligatorio",
+    recommendation: "Recomendado",
     estimatedTime: "25 min aprox.",
     title: "Evaluación Diagnóstica Inicial",
     description:
@@ -627,4 +628,70 @@ export const learningPath = {
     detail: "15 minutos diarios • Lun a Jue",
     action: "Ajustar",
   },
+}
+
+/* -------------------------------------------------------------------------- */
+/* Mapa de misiones secuenciales (home)                                        */
+/* -------------------------------------------------------------------------- */
+
+/** Icono asociado a un nivel. La equivalencia con lucide vive en la vista. */
+export type MissionIcon = "fraction" | "reading" | "problems"
+
+export type MissionNode = {
+  id: number
+  state: "active" | "locked"
+  /** Etiqueta corta que cabe dentro del nodo circular. */
+  label: string
+  /** Nombre completo del nivel, mostrado bajo el nodo. */
+  title: string
+  icon: MissionIcon
+  /** Destino del nivel activo. */
+  to?: string
+  action?: string
+  lockedNote?: string
+}
+
+export const topicSearch = {
+  label: "Tema libre",
+  placeholder:
+    "Escribe un tema libre (ej: Los Piratas, El Espacio, Fracciones)...",
+  action: "Crear Misión",
+  emptyError: "Escribe un tema para crear una aventura personal.",
+  created: "Misión personalizada en preparación",
+}
+
+export const missionMap = {
+  eyebrow: "Ruta de misiones",
+  title: "Tu Ruta de Misiones",
+  description:
+    "Avanza nivel por nivel. Cada misión se desbloquea al completar la anterior y respeta tu ritmo de 15 minutos diarios.",
+  progressNote: "1 de 3 niveles desbloqueados",
+  viewAllAction: "Ver ruta completa",
+  nodes: [
+    {
+      id: 1,
+      state: "active",
+      label: "Nivel 1",
+      title: "Fracciones con sentido visual",
+      icon: "fraction",
+      to: "/learning-path",
+      action: "Continuar misión",
+    },
+    {
+      id: 2,
+      state: "locked",
+      label: "Nivel 2",
+      title: "Pistas ocultas en la lectura",
+      icon: "reading",
+      lockedNote: "Desbloquea al completar el Nivel 1",
+    },
+    {
+      id: 3,
+      state: "locked",
+      label: "Nivel 3",
+      title: "Resolución de problemas integrados",
+      icon: "problems",
+      lockedNote: "Desbloquea al completar el Nivel 2",
+    },
+  ] satisfies MissionNode[],
 }
