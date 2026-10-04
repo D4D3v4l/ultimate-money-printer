@@ -149,10 +149,7 @@ export function LearningPaths() {
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <span className="text-xs font-semibold tracking-wider text-primary uppercase">
-                {routesSection.eyebrow}
-              </span>
-              <CardTitle className="mt-1 text-xl md:text-2xl">
+              <CardTitle className="text-xl md:text-2xl">
                 {routesSection.title}
               </CardTitle>
             </div>
@@ -364,6 +361,7 @@ function StoryAction({ status }: { status: Story["status"] }) {
   if (status === "done") {
     return (
       <Badge variant="secondary" className="shrink-0 self-start sm:self-auto">
+        <CheckIcon data-icon="inline-start" />
         {routesSection.statusLabels.completed}
       </Badge>
     );
