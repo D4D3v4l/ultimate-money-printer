@@ -97,10 +97,11 @@ export function LearningPaths() {
   ).length;
   const overallProgress = Math.round((doneStories / allStories.length) * 100);
   /**
-   * Como las rutas son independientes, se abren todas por defecto: si una
-   * bloquea a otra, el alumno no puede avanzar y no ve lo que tiene pendiente.
+   * Los acordeones abren cerrados: la lista de rutas se lee de un vistazo y
+   * el alumno despliega solo la que le interesa. Base UI espera un array, así
+   * que se deja vacío en lugar de omitir la prop.
    */
-  const openRouteIds = themeRoutes.map((route) => route.id);
+  const closedByDefault: string[] = [];
 
   /** Valida el tema y confirma la misión; la historia se generará en el juego. */
   function handleTopicSubmit(value: string) {
@@ -172,7 +173,7 @@ export function LearningPaths() {
         </CardHeader>
 
         <CardContent className="flex flex-col gap-4">
-          <Accordion multiple defaultValue={openRouteIds} className="gap-2">
+          <Accordion multiple defaultValue={closedByDefault} className="gap-2">
             {themeRoutes.map((route) => (
               <RouteItem key={route.id} route={route} />
             ))}
