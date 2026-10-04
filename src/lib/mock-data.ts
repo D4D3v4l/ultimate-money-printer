@@ -56,7 +56,7 @@ export const portal = {
     badge: "Paso obligatorio",
     recommendation: "Recomendado",
     estimatedTime: "25 min aprox.",
-    title: "Evaluación Diagnóstica Inicial",
+    title: "Test de Diagnóstico Inicial",
     description:
       "12 reactivos interactivos diseñados para identificar tus competencias actuales en Matemáticas y Comprensión Lectora. Esta prueba no tiene límite de tiempo estricto y servirá para calibrar tu ritmo de aprendizaje.",
     progress: 0,
@@ -698,7 +698,7 @@ export const topicSearch = {
   label: "Tema libre",
   placeholder:
     "Escribe un tema libre (ej: Los Piratas, El Espacio, Fracciones)...",
-  action: "Crear Misión",
+  action: "¡Crear Misión!",
   emptyError: "Escribe un tema para crear una aventura personal.",
   created: "Misión personalizada en preparación",
 }

@@ -18,8 +18,10 @@ import {
 import { Input } from "@/components/ui/input";
 import {
   learningPath,
+  mascots,
   portal,
   routesSection,
+  student,
   themeRoutes,
   topicSearch,
   tutors,
@@ -114,6 +116,12 @@ function MissionMap() {
 
   return (
     <>
+      {/* El prototipo abre con un saludo; aquí la vista arranca en el buscador,
+          así que el h1 queda disponible para lectores de pantalla. */}
+      <h1 className="sr-only">
+        {routesSection.title} de {student.name}
+      </h1>
+
       {/* Buscador de tema libre */}
       <Card
         size="sm"
@@ -269,14 +277,13 @@ function DiagnosticCallout() {
           {diagnostic.title}
         </h2>
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          Descubre tus superpoderes en {tutors[0].specialty.toLowerCase()} y{" "}
-          {tutors[1].specialty.toLowerCase()}, acompañado de{" "}
+          Descubre tus superpoderes en matemáticas y lectura junto al{" "}
           <strong className="font-medium text-foreground">
-            {tutors[0].name}
+            {mascots[0].name}
           </strong>{" "}
-          y{" "}
+          y al{" "}
           <strong className="font-medium text-foreground">
-            {tutors[1].name}
+            {mascots[1].name}
           </strong>
           .
         </p>
