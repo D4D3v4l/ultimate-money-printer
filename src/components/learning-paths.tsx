@@ -7,14 +7,18 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@/components/ui/input-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   learningPath,
   mascots,
@@ -127,32 +131,24 @@ export function LearningPaths() {
       </h1>
 
       {/* Buscador de tema libre */}
-      <Card
-        size="sm"
-        className="gap-0 p-3 md:flex-row md:items-center md:gap-3"
-      >
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-primary">
-          <SparklesIcon className="size-4" />
-        </div>
-        <TopicSearchForm
-          topic={topic}
-          onTopicChange={setTopic}
-          onSubmit={handleTopicSubmit}
-        />
-      </Card>
+      <TopicSearchForm
+        topic={topic}
+        onTopicChange={setTopic}
+        onSubmit={handleTopicSubmit}
+      />
 
       {/* Test de diagnóstico inicial */}
       <DiagnosticCallout />
 
       {/* Rutas por tema: un acordeón por ruta, con sus historias dentro */}
-      <Card>
-        <CardHeader>
+      <section className="flex flex-col gap-4">
+        {/* Sin padding horizontal: el título, la descripción y el avance global
+            comparten el mismo borde izquierdo que el acordeón. */}
+        <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <CardTitle className="text-xl md:text-2xl">
-                {routesSection.title}
-              </CardTitle>
-            </div>
+            <h2 className="text-xl font-bold tracking-tight md:text-2xl">
+              {routesSection.title}
+            </h2>
             {isFullRoute ? null : (
               <Button
                 variant="outline"
@@ -164,35 +160,35 @@ export function LearningPaths() {
               </Button>
             )}
           </div>
-          <CardDescription className="max-w-3xl text-sm">
+          <p className="max-w-3xl text-sm text-muted-foreground">
             {routesSection.description}
-          </CardDescription>
-        </CardHeader>
+          </p>
+        </div>
 
-        <CardContent className="flex flex-col gap-4">
-          <Accordion multiple defaultValue={closedByDefault} className="gap-2">
-            {themeRoutes.map((route) => (
-              <RouteItem key={route.id} route={route} />
-            ))}
-          </Accordion>
-
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>
-                {doneStories} de {allStories.length} {routesSection.storiesUnit}
-              </span>
-              <span className="font-medium text-foreground">
-                {overallProgress}% completado
-              </span>
-            </div>
-            <ProgressBar
-              value={overallProgress}
-              size="lg"
-              label={learningPath.progress.label}
-            />
+        {/* Avance global: resume el conjunto de rutas, así que va antes del
+            acordeón y no al final, donde parecía un pie de sección. */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              {doneStories} de {allStories.length} {routesSection.storiesUnit}
+            </span>
+            <span className="font-medium text-foreground">
+              {overallProgress}% completado
+            </span>
           </div>
-        </CardContent>
-      </Card>
+          <ProgressBar
+            value={overallProgress}
+            size="lg"
+            label={learningPath.progress.label}
+          />
+        </div>
+
+        <Accordion multiple defaultValue={closedByDefault} className="gap-2">
+          {themeRoutes.map((route) => (
+            <RouteItem key={route.id} route={route} />
+          ))}
+        </Accordion>
+      </section>
     </>
   );
 }
@@ -212,22 +208,55 @@ function TopicSearchForm({
 }) {
   return (
     <form
-      className="flex flex-1 flex-col gap-2 md:flex-row md:items-center md:gap-2"
       onSubmit={(event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         onSubmit(topic);
       }}
     >
-      <Input
-        value={topic}
-        onChange={(event) => onTopicChange(event.target.value)}
-        placeholder={topicSearch.placeholder}
-        aria-label={topicSearch.label}
-        className="md:h-10 md:text-base"
-      />
-      <Button type="submit" size="lg" className="h-10 shrink-0 px-4 md:w-auto">
-        {topicSearch.action}
-      </Button>
+      <InputGroup className="h-10">
+        <InputGroupAddon>
+          <SparklesIcon />
+        </InputGroupAddon>
+
+        <InputGroupInput
+          value={topic}
+          onChange={(event) => onTopicChange(event.target.value)}
+          placeholder={topicSearch.placeholder}
+          aria-label={topicSearch.label}
+          className="text-base"
+        />
+
+        {/*
+          En móvil el input se queda con el ancho que hay, así que el botón
+          se reduce al icono. Desde `md` vuelve a su ancho natural con el
+          texto: el `sr-only` mantiene el nombre accesible en ambos tamaños.
+        */}
+        <InputGroupAddon align="inline-end">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <InputGroupButton
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  aria-label={topicSearch.action}
+                />
+              }
+            >
+              {/*
+                Sin `data-icon`: el botón es cuadrado en móvil y ese atributo
+                aplica `pl-2`, que descentra el icono. En `md` el `gap-1.5`
+                base del `Button` ya separa icono y texto.
+              */}
+              <RocketIcon />
+              <span className="sr-only md:not-sr-only">
+                {topicSearch.action}
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>{topicSearch.action}</TooltipContent>
+          </Tooltip>
+        </InputGroupAddon>
+      </InputGroup>
     </form>
   );
 }
@@ -237,44 +266,44 @@ function DiagnosticCallout() {
   const diagnostic = portal.diagnostic;
 
   return (
-    <Card className="gap-0 p-0 lg:flex-row lg:items-stretch lg:justify-between">
-      <div className="flex flex-1 flex-col gap-3 p-4 lg:p-6">
-        <h2 className="text-xl font-semibold md:text-2xl">
-          {diagnostic.title}
-        </h2>
-        <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
-          Descubre tus superpoderes en matemáticas y lectura junto al{" "}
-          <strong className="font-medium text-foreground">
-            {mascots[0].name}
-          </strong>{" "}
-          y al{" "}
-          <strong className="font-medium text-foreground">
-            {mascots[1].name}
-          </strong>
-          .
-        </p>
-        <div>
+    <Card className="gap-0 p-0">
+      {/*
+        En móvil el botón va bajo el texto, alineado a la izquierda. Desde
+        `lg` pasa a una columna propia a la derecha, centrada en la altura
+        gracias a `items-center` del contenedor.
+      */}
+      <div className="flex flex-col gap-4 p-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:p-6">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-xl font-bold tracking-tight md:text-2xl">
+              {diagnostic.title}
+            </h2>
+            <p className="text-sm font-medium text-muted-foreground">
+              {diagnostic.metaLine}
+            </p>
+          </div>
+          <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground md:text-base">
+            Descubre tus superpoderes en matemáticas y lectura junto al{" "}
+            <strong className="font-medium text-foreground">
+              {mascots[0].name}
+            </strong>{" "}
+            y al{" "}
+            <strong className="font-medium text-foreground">
+              {mascots[1].name}
+            </strong>
+            .
+          </p>
+        </div>
+        <div className="lg:shrink-0">
           <Button
             size="lg"
-            className="h-10 px-4"
+            className="h-10 w-full px-4 lg:w-auto"
             render={<Link to="/diagnostic" />}
           >
             Lanzar Test
             <RocketIcon />
           </Button>
         </div>
-      </div>
-
-      <div className="flex w-full flex-col justify-center gap-2 border-t bg-muted/60 p-4 lg:w-64 lg:shrink-0 lg:border-t-0 lg:border-l">
-        {diagnostic.meta.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between gap-2"
-          >
-            <span className="text-xs text-muted-foreground">{item.label}</span>
-            <span className="text-xs font-semibold">{item.value}</span>
-          </div>
-        ))}
       </div>
     </Card>
   );

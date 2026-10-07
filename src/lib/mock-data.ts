@@ -58,10 +58,7 @@ export const portal = {
     description:
       "12 reactivos interactivos diseñados para identificar tus competencias actuales en Matemáticas y Comprensión Lectora. Esta prueba no tiene límite de tiempo estricto y servirá para calibrar tu ritmo de aprendizaje.",
     progress: 0,
-    meta: [
-      { label: "Preguntas", value: "12 reactivos" },
-      { label: "Modalidad", value: "Ritmo libre" },
-    ],
+    metaLine: "12 preguntas - Ritmo libre",
     emptyProgressNote:
       "Sin intentos registrados hoy. Al dar clic inicias el primer ejercicio.",
   },

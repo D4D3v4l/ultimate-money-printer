@@ -1,7 +1,6 @@
 import { usePetFriendship } from "@/components/pet-friendship";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { themeRoutes } from "@/lib/mock-data";
@@ -544,7 +543,7 @@ function MisionesPage() {
   }
 
   return (
-    <Card className="gap-0 p-0">
+    <div className="flex flex-col">
       {/* Cabecera del escenario */}
       <div className="flex flex-col gap-3 border-b px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
         <div className="flex items-center gap-3">
@@ -642,7 +641,7 @@ function MisionesPage() {
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -695,7 +694,7 @@ function MissionStage({
   }
 
   return (
-    <CardContent className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 px-4 md:px-6">
       {/* Pregunta */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -874,7 +873,7 @@ function MissionStage({
           🔍 Pedir Pista
         </Button>
       </div>
-    </CardContent>
+    </div>
   );
 }
 
